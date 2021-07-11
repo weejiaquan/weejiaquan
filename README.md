@@ -11,7 +11,7 @@ I am **Wee Jia Quan**, a fourth-year Bachelor of Arts student majoring in **Comp
 -   **Databases:**  PostgreSQL, mariaDB, Firebase
 -   **Frameworks:**  Vue, React, Django, Laravel, Ruby on Rails
 -   **Developer Tools:**  JetBrain Suite (PHPStorm / WebStorm / IntelliJ), VS Code, ESLint, Git
--   **Libraries:**  Pillow, OpenCV, Numpy, Selenium
+-   **Libraries:**  Pillow, OpenCV, Numpy, Selenium, Pandas
 -   **Software:**  SCCM / WDS, Apache, Nginx, Adobe Suite CC, Microsoft Office, Ninite
 
 ## Contacts
