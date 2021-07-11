@@ -16,7 +16,7 @@ I am **Wee Jia Quan**, a fourth-year Bachelor of Arts student majoring in **Comp
 
 ## Contacts
 <ul class="icons">
-                <li><a href="https://www.facebook.com/weejiaquan/" class="icon brands fa-facebook"><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.facebook.com/weejiaquan/" class="icon brands fa-facebook"><span class="label">Facebook</span></a></li>
                 <li><a href="https://github.com/weejiaquan/" class="icon brands fa-github"><span class="label">Github</span></a></li>
                 <li><a href="https://www.linkedin.com/in/weejiaquan/" class="icon brands fa-linkedin"><span class="label">Linkedin</span></a></li>
                 <li><a href="mailto:weejiaquan1234@gmail.com" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
