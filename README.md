@@ -14,7 +14,7 @@ I am **Wee Jia Quan**, a fourth-year Bachelor of Arts student majoring in **Comp
 -   **Libraries:**  Pillow, OpenCV, Numpy, Selenium
 -   **Software:**  SCCM / WDS, Apache, Nginx, Adobe Suite CC, Microsoft Office, Ninite
 
-## Social medias
+## Contacts
 <ul class="icons">
                 <li><a href="https://www.facebook.com/weejiaquan/" class="icon brands fa-facebook"><span class="label">Twitter</span></a></li>
                 <li><a href="https://github.com/weejiaquan/" class="icon brands fa-github"><span class="label">Github</span></a></li>
