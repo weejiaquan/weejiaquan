@@ -6,7 +6,6 @@ I am **Wee Jia Quan**, a fourth-year Bachelor of Arts student majoring in **Comp
 - 🌱 I’m currently learning **Ruby on Rails / React.js**
 - 📫 How to reach me: **Email** or **Social Medias**
 - ⚡ Fun fact: I write code and forget about it the next day.
-- 
 ## Skills and Abilities
 -   **Languages:**  Python, Javascript, PHP, Java, HTML/CSS, C/C++
 -   **Databases:**  PostgreSQL, mariaDB, Firebase
