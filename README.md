@@ -2,8 +2,8 @@
 ## About me 👋
 I am **Wee Jia Quan**, a fourth-year Bachelor of Arts student majoring in **Computer Science** at **University of British Columbia**.
 
-- 🔭 I’m currently working on **COSC499 Capstone Project (Ruby on Rails)**
-- 🌱 I’m currently learning **Ruby on Rails / React.js**
+- 🔭 I’m currently working on **Django**
+- 🌱 I’m currently learning **Django /  React.js**
 - 📫 How to reach me: **Email** or **Social Medias**
 - ⚡ Fun fact: I write code and forget about it the next day.
 ## Skills and Abilities
