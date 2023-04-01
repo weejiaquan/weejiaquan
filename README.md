@@ -1,9 +1,10 @@
 
 ## About me 👋
-I am **Wee Jia Quan**, a fourth-year Bachelor of Arts student majoring in **Computer Science** at **University of British Columbia**.
+I am **Wee Jia Quan**, a recent graduate of Bachelor of Arts majoring in **Computer Science** at **University of British Columbia**.
 
-- 🔭 I’m currently working on **Django**
-- 🌱 I’m currently learning **Django /  React.js**
+**I'm looking for a job in Greater Vancouver Area or Remote**
+- 🔭 I’m currently working on **Wordpress LMS / Laravel**
+- 🌱 I’m currently learning **Wordpress Plugin Development**
 - 📫 How to reach me: **Email** or **Social Medias**
 - ⚡ Fun fact: I write code and forget about it the next day.
 ## Skills and Abilities
