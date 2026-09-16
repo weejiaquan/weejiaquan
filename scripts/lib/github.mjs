@@ -1,3 +1,5 @@
+// Private repos are included when the token can see them (CI uses METRICS_TOKEN, a PAT),
+// so repo counts, languages and push times cover private work too. Names are never rendered.
 export const CONTRIB_QUERY = `query($login:String!){
   user(login:$login){
     contributionsCollection{
@@ -5,7 +7,7 @@ export const CONTRIB_QUERY = `query($login:String!){
       totalCommitContributions
       totalPullRequestContributions
     }
-    repositories(first:100, ownerAffiliations:OWNER, isFork:false, privacy:PUBLIC, orderBy:{field:STARGAZERS, direction:DESC}){
+    repositories(first:100, ownerAffiliations:OWNER, isFork:false, orderBy:{field:STARGAZERS, direction:DESC}){
       nodes{ name pushedAt primaryLanguage{ name } }
     }
   }

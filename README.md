@@ -1,6 +1,6 @@
 ![Wee Jia Quan](/cards/hero.svg)
 
-Software engineer in Vancouver, BC. I build offline-first tools, hardware bridges,
+Software engineer in Richmond, BC. I build offline-first tools, hardware bridges,
 and things that probably shouldn't work but do.
 
 **[weejiaquan.com](https://www.weejiaquan.com)**
