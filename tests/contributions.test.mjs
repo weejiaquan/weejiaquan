@@ -42,3 +42,9 @@ test("contributions card survives a year with zero activity", () => {
   assert.deepEqual(violations(out), [])
   assert.ok(!out.includes("NaN"), "log scale must not divide by zero")
 })
+
+test("contributions card never leaks the literal text \"undefined\" into a glyph cell", () => {
+  const empty = { ...contrib, weeks: [[0, 0, 0, 0, 0, 0, 0]], weekTotals: [0], max: 0, total: 0 }
+  assert.ok(!contributionsCard({ contrib: empty }).includes("undefined"))
+  assert.ok(!svg.includes("undefined"))
+})

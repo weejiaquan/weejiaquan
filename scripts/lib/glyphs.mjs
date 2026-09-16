@@ -2,7 +2,12 @@ export const RAMP = ".:-=+*#%@"
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v)
 
-export const glyphFor = t => RAMP[clamp(Math.round(t * (RAMP.length - 1)), 0, RAMP.length - 1)]
+// Non-finite input (NaN, ±Infinity, or anything that coerces to NaN, e.g.
+// undefined) falls back to the sparsest glyph instead of indexing RAMP with
+// NaN, which silently yields undefined and would leak the literal string
+// "undefined" into rendered SVG.
+export const glyphFor = t =>
+  Number.isFinite(t) ? RAMP[clamp(Math.round(t * (RAMP.length - 1)), 0, RAMP.length - 1)] : RAMP[0]
 
 const QSTEP = 0.07
 export const quant = op => (Math.round(op / QSTEP) * QSTEP).toFixed(2)

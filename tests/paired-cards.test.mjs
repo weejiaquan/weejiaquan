@@ -40,6 +40,10 @@ test("languages card handles an empty language list without dividing by zero", (
   assert.ok(!svg.includes("NaN"))
 })
 
+test("languages card never leaks the literal text \"undefined\" for an empty language list", () => {
+  assert.ok(!languagesCard({ languages: [] }).includes("undefined"))
+})
+
 test("rhythm card draws a 24x7 grid", () => {
   const cells = (rhythmCard({ matrix }).match(/<text/g) || []).length
   assert.ok(cells >= 24 * 7, `expected at least 168 cells, got ${cells}`)
@@ -50,4 +54,9 @@ test("rhythm card handles an all-zero matrix", () => {
   const svg = rhythmCard({ matrix: zero })
   assert.deepEqual(violations(svg), [])
   assert.ok(!svg.includes("NaN"))
+})
+
+test("rhythm card never leaks the literal text \"undefined\" for an all-zero matrix", () => {
+  const zero = Array.from({ length: 7 }, () => new Array(24).fill(0))
+  assert.ok(!rhythmCard({ matrix: zero }).includes("undefined"))
 })

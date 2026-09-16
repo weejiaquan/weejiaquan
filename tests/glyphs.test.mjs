@@ -19,6 +19,15 @@ test("glyphFor clamps out-of-range input instead of returning undefined", () => 
   assert.equal(glyphFor(99), "@")
 })
 
+test("glyphFor never returns undefined for non-finite input", () => {
+  for (const t of [NaN, undefined, Infinity, -Infinity]) {
+    const g = glyphFor(t)
+    assert.equal(typeof g, "string", `glyphFor(${t}) returned ${typeof g}, not a string`)
+    assert.equal(g.length, 1, `glyphFor(${t}) = ${JSON.stringify(g)}, expected a single character`)
+    assert.equal(g, RAMP[0], `glyphFor(${t}) = ${JSON.stringify(g)}, expected sparsest glyph "${RAMP[0]}"`)
+  }
+})
+
 test("quant snaps opacity to 0.07 steps as a 2dp string", () => {
   assert.equal(quant(0.5), "0.49")
   assert.equal(quant(0), "0.00")
