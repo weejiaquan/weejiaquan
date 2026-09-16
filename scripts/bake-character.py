@@ -10,11 +10,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(HERE, "assets")
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(OUT_DIR, "character-source.png")
 
-# placement on the 900x400 card
-DEST_X, DEST_Y, DEST_W, DEST_H = 548.0, -6.0, 352.0, 440.0
+# placement inside the hero's 420px art zone (card is 900x500, text lives in the footer).
+# The box sits fully inside the card so no edge is hard-cropped; every edge fades instead.
+DEST_X, DEST_Y, DEST_W, DEST_H = 566.0, 16.0, 310.0, 388.0
 # horizontal dissolve band: fully glyphs at BAND_X0, fully image by BAND_X1
-BAND_X0, BAND_X1 = 542.0, 700.0
-FADE_BOTTOM_Y = 360.0
+BAND_X0, BAND_X1 = 560.0, 700.0
+FADE_BOTTOM_Y = 336.0
+FADE_LEN = 68.0        # bottom fade length: fully gone at FADE_BOTTOM_Y + FADE_LEN
+EDGE_FADE = 40.0       # right-edge fade length, so the source crop never shows as a line
 CW, CH = 4.8, 5.8
 RAMP = "  .:-=+*#%@"
 
@@ -38,12 +41,13 @@ for r in range(rows):
     for c in range(cols):
         cx = DEST_X + c * CW
         cy = DEST_Y + r * CH
-        if cy < -6 or cy > 416:
+        if cy < DEST_Y - 2 or cy > FADE_BOTTOM_Y + FADE_LEN:
             continue
         # image alpha at this point: how much the mask keeps
         keep_x = 0.0 if cx <= BAND_X0 else min(1.0, (cx - BAND_X0) / (BAND_X1 - BAND_X0))
-        keep_y = 1.0 if cy <= FADE_BOTTOM_Y else max(0.0, 1.0 - (cy - FADE_BOTTOM_Y) / 50.0)
-        keep = keep_x * keep_y
+        keep_y = 1.0 if cy <= FADE_BOTTOM_Y else max(0.0, 1.0 - (cy - FADE_BOTTOM_Y) / FADE_LEN)
+        keep_r = max(0.0, min(1.0, (DEST_X + DEST_W - cx) / EDGE_FADE))
+        keep = keep_x * keep_y * keep_r
         if keep > 0.97:
             continue                      # solid image here, no glyphs needed
         # sample source pixel
@@ -75,6 +79,8 @@ out = {
     "dest": [DEST_X, DEST_Y, DEST_W, DEST_H],
     "band": [BAND_X0, BAND_X1],
     "fadeBottom": FADE_BOTTOM_Y,
+    "fadeLen": FADE_LEN,
+    "edgeFade": EDGE_FADE,
     "encoded": [ENC_W, enc.size[1]],
     "cells": cells,
 }

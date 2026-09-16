@@ -121,3 +121,36 @@ test("hero card survives an empty calendar", () => {
   console.log("empty calendar ->", v)
   assert.deepEqual(v, [])
 })
+
+test("hero card is 900x500 with a footer band below the art", () => {
+  assert.match(svg, /<svg[^>]*width="900"[^>]*height="500"/)
+})
+
+test("all readable text sits in the footer, below the art zone", () => {
+  // glyph cells are single characters; everything longer is a label, stat or credit
+  const labels = [...svg.matchAll(/<text\b([^>]*)>([^<]{2,})/g)]
+    .map(m => ({ y: Number((m[1].match(/\by="([\d.]+)"/) || [])[1]), text: m[2].trim() }))
+  console.log("label rows:", JSON.stringify(labels))
+  assert.ok(labels.length >= 6, `expected label/stat/credit text, found ${labels.length}`)
+  for (const l of labels) assert.ok(l.y > 420, `"${l.text}" at y=${l.y} is inside the art zone`)
+  for (const t of ["READ ERROR", "ART @Azzinhee", "CONTRIB", "COMMITS", "REPOS"]) {
+    assert.ok(svg.includes(t), `missing footer text ${t}`)
+  }
+})
+
+test("character sits fully inside the art zone, so nothing is hard-cropped by the card edge", () => {
+  const [dx, dy, dw, dh] = character.baked.dest
+  console.log("character box:", { dx, dy, right: dx + dw, bottom: dy + dh })
+  assert.ok(dy >= 0, "top edge would clip the halo")
+  assert.ok(dx + dw <= 900, "right edge would clip the ponytail")
+  assert.ok(dy + dh <= 420, "bottom edge would run into the footer")
+})
+
+test("character mask fades the right edge as well as the left and bottom", () => {
+  const grad = svg.match(/<linearGradient id="mgx"[\s\S]*?<\/linearGradient>/)
+  assert.ok(grad, "horizontal mask gradient missing")
+  const stops = [...grad[0].matchAll(/stop-color="(#[0-9a-fA-F]+)"/g)].map(m => m[1].toLowerCase())
+  console.log("mgx stops:", stops)
+  assert.equal(stops[0], "#000", "left edge must start transparent")
+  assert.equal(stops[stops.length - 1], "#000", "right edge must end transparent")
+})

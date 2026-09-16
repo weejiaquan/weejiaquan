@@ -6,10 +6,11 @@ import { RAMP, quant, hash, push, tiers } from "../lib/glyphs.mjs"
 import { strokeCov } from "../lib/strokefont.mjs"
 import { card } from "../lib/svg.mjs"
 
-const W = 900, H = 440
+const W = 900, H = 500
+const ART = 420          // art zone height; every label, stat and the credit sit below it
 const NAME = ["WEE JIA", "QUAN"]
 const GW = 7, GGAP = 2, GH = 11, LGAP = 2
-const NCW = 9.4, NCH = 11.2, NX = 48, NY = 104
+const NCW = 8.8, NCH = 10.5, NX = 48, NY = 92
 const BUCKETS = 20
 
 export function heroCard({ contrib, repoCount, character }) {
@@ -107,6 +108,9 @@ export function heroCard({ contrib, repoCount, character }) {
 
   const [DX, DY, DW, DH] = char.dest
   const [B0, B1] = char.band
+  const R = DX + DW
+  const fadeInEnd = ((B1 - B0) / (R - B0)).toFixed(3)
+  const fadeOutStart = ((R - char.edgeFade - B0) / (R - B0)).toFixed(3)
 
   const defs = `
   <linearGradient id="irid" x1="-0.6" y1="0" x2="0.4" y2="0.25">
@@ -131,10 +135,12 @@ export function heroCard({ contrib, repoCount, character }) {
     <stop offset="0" stop-color="#1B222B"/><stop offset="1" stop-color="#0A0C10"/>
   </radialGradient>
   <!-- horizontal dissolve: image absent at the band start, solid by the band end -->
-  <linearGradient id="mgx" gradientUnits="userSpaceOnUse" x1="${B0}" y1="0" x2="${B1}" y2="0">
-    <stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/>
+  <!-- ...and fades out again over the last edgeFade px, so the source crop never shows as a hard line -->
+  <linearGradient id="mgx" gradientUnits="userSpaceOnUse" x1="${B0}" y1="0" x2="${R}" y2="0">
+    <stop offset="0" stop-color="#000"/><stop offset="${fadeInEnd}" stop-color="#fff"/>
+    <stop offset="${fadeOutStart}" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
   </linearGradient>
-  <linearGradient id="mgy" gradientUnits="userSpaceOnUse" x1="0" y1="${char.fadeBottom}" x2="0" y2="${char.fadeBottom + 78}">
+  <linearGradient id="mgy" gradientUnits="userSpaceOnUse" x1="0" y1="${char.fadeBottom}" x2="0" y2="${char.fadeBottom + char.fadeLen}">
     <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
   </linearGradient>
   <mask id="mx"><rect x="${DX}" y="-40" width="${DW}" height="${H + 80}" fill="url(#mgx)"/></mask>
@@ -167,20 +173,22 @@ export function heroCard({ contrib, repoCount, character }) {
   </g>
 </g>
 
-<rect x="38" y="86" width="${nCols * NCW + 24}" height="2" fill="#A9F9FF">
-  <animate attributeName="y" values="86;${NY + nRows * NCH + 6};${NY + nRows * NCH + 6}" keyTimes="0;0.3;1" dur="13s" repeatCount="indefinite"/>
+<rect x="38" y="${NY - 18}" width="${nCols * NCW + 24}" height="2" fill="#A9F9FF">
+  <animate attributeName="y" values="${NY - 18};${NY + nRows * NCH + 6};${NY + nRows * NCH + 6}" keyTimes="0;0.3;1" dur="13s" repeatCount="indefinite"/>
   <animate attributeName="opacity" values=".9;.9;0;0" keyTimes="0;0.26;0.33;1" dur="13s" repeatCount="indefinite"/>
 </rect>
 
-<text x="48" y="50" font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" font-size="10.5" fill="#71808F" letter-spacing="4.6">READ ERROR ／ 読取</text>
-<path d="M48 62h${Math.round(nCols * NCW)}" stroke="#2A323C"/>
-<path d="M48 392h500" stroke="#2A323C"/>
+<!-- footer: all readable text lives below the art zone -->
+<path d="M48 ${ART + 8}h804" stroke="#2A323C"/>
+<g font-family="'GeistSub',Geist,Inter,system-ui,sans-serif">
+  <text x="48" y="${ART + 32}" font-size="10.5" fill="#71808F" letter-spacing="4.6">READ ERROR ／ 読取</text>
+  <text x="852" y="${ART + 32}" text-anchor="end" font-size="9" fill="#5F6E7E" letter-spacing="1.8">ART @Azzinhee</text>
+</g>
 <g font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" fill="#EAF6FF">
-  <text x="48" y="418" font-size="20" font-weight="500" letter-spacing="-.4">${total.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">CONTRIB</tspan></text>
-  <text x="206" y="418" font-size="20" font-weight="500">${commits.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">COMMITS</tspan></text>
-  <text x="356" y="418" font-size="20" font-weight="500">${prs.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">PR</tspan></text>
-  <text x="464" y="418" font-size="20" font-weight="500">${repoCount.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">REPOS</tspan></text>
-  <text x="${DX + DW}" y="424" text-anchor="end" font-size="9" fill="#5F6E7E" letter-spacing="1.8">ART @Azzinhee</text>
+  <text x="48" y="${ART + 64}" font-size="20" font-weight="500" letter-spacing="-.4">${total.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">CONTRIB</tspan></text>
+  <text x="206" y="${ART + 64}" font-size="20" font-weight="500">${commits.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">COMMITS</tspan></text>
+  <text x="372" y="${ART + 64}" font-size="20" font-weight="500">${prs.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">PR</tspan></text>
+  <text x="488" y="${ART + 64}" font-size="20" font-weight="500">${repoCount.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">REPOS</tspan></text>
 </g>`
 
   return card({ w: W, h: H, css: css.join(""), defs, body })
