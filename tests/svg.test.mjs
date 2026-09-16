@@ -43,3 +43,39 @@ test("PALETTE exposes the agreed accent colours", () => {
   assert.equal(PALETTE.mint, "#A8F0D8")
   assert.equal(PALETTE.bg, "#0A0C10")
 })
+
+test("violations flags a filtered non-group element with a SMIL animation child", () => {
+  // regression case: the prototype that pinned a CPU core had a filtered,
+  // animating <rect> with no class attribute at all.
+  const bad = card({
+    w: 700, h: 400,
+    defs: '<filter id="bloom"></filter>',
+    body: '<rect x="38" y="86" width="620" height="2" fill="#A9F9FF" filter="url(#bloom)">'
+      + '<animate attributeName="y" values="86;373;373" dur="13s" repeatCount="indefinite"/>'
+      + '</rect>',
+  })
+  assert.ok(violations(bad).some(v => v.includes("filter")))
+})
+
+test("violations flags a filtered element with a class regardless of tag name", () => {
+  const bad = card({ w: 10, h: 10, body: '<rect class="n0" filter="url(#b)"/>' })
+  assert.ok(violations(bad).some(v => v.includes("filter")))
+})
+
+test("violations flags an on* event handler attribute", () => {
+  const bad = card({ w: 10, h: 10, body: '<rect onload="alert(1)"/>' })
+  assert.ok(violations(bad).some(v => v.includes("event handler")))
+})
+
+test("violations does not flag a static filtered element with no animation", () => {
+  const ok = card({
+    w: 10, h: 10,
+    defs: '<filter id="bloom"></filter>',
+    body: '<rect filter="url(#bloom)"><title>static</title></rect>',
+  })
+  assert.deepEqual(violations(ok), [])
+})
+
+test("card with a plain rect body still passes with zero violations", () => {
+  assert.deepEqual(violations(card({ w: 900, h: 190, body: "<rect/>" })), [])
+})
