@@ -96,3 +96,38 @@ test("violations flags class/filter with whitespace around the equals sign", () 
   const bad = card({ w: 10, h: 10, body: '<rect class ="n0" filter= "url(#b)"/>' })
   assert.ok(violations(bad).some(v => v.includes("filter")))
 })
+
+test("violations flags the literal text \"undefined\" leaking into a card", () => {
+  const bad = card({ w: 10, h: 10, body: "<text>undefined</text>" })
+  const v = violations(bad)
+  console.log("undefined leak ->", v)
+  assert.ok(v.some(x => x.includes("undefined")), `expected an undefined violation, got ${JSON.stringify(v)}`)
+})
+
+test("violations flags NaN leaking into an attribute", () => {
+  const bad = card({ w: 10, h: 10, body: '<g opacity="NaN"><text>x</text></g>' })
+  const v = violations(bad)
+  console.log("NaN leak ->", v)
+  assert.ok(v.some(x => x.includes("NaN")), `expected a NaN violation, got ${JSON.stringify(v)}`)
+})
+
+test("violations ignores undefined, NaN and // occurring by chance inside a base64 data URI", () => {
+  // base64 is [A-Za-z0-9+/=], so all three substrings can appear in a legitimate payload
+  const ok = card({ w: 10, h: 10, body: '<image href="data:image/webp;base64,QUundefinedNaNQ//x+/=="/>' })
+  const v = violations(ok)
+  console.log("base64 payload ->", v)
+  assert.deepEqual(v, [])
+})
+
+test("violations still flags undefined outside a data URI on the same element", () => {
+  const bad = card({ w: 10, h: 10, body: '<image href="data:image/webp;base64,QUFB" x="undefined"/>' })
+  assert.ok(violations(bad).some(x => x.includes("undefined")))
+})
+
+test("violations flags a protocol-relative external reference but not xmlns", () => {
+  const bad = card({ w: 10, h: 10, body: '<image href="//evil.test/a.png"/>' })
+  const v = violations(bad)
+  console.log("protocol-relative ->", v)
+  assert.ok(v.some(x => x.includes("external")), `expected an external violation, got ${JSON.stringify(v)}`)
+  assert.ok(violations(card({ w: 10, h: 10, css: "@import url(//evil.test/x.css);" })).some(x => x.includes("external")))
+})

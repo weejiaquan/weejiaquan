@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs"
 
 const readB64 = f => readFileSync(new URL(`../../assets/fonts/${f}`, import.meta.url), "utf8").trim()
 
+// Read once at import time, so the font assets must exist before this module loads.
 export const FONT_FACE_CSS =
   `@font-face{font-family:'PlexMonoSub';font-weight:700;src:url(data:font/woff2;base64,${readB64("plex-mono-subset.txt")}) format('woff2')}`
   + `@font-face{font-family:'GeistSub';font-weight:500;src:url(data:font/woff2;base64,${readB64("geist-subset.txt")}) format('woff2')}`
@@ -54,9 +55,17 @@ function subtreeOf(svg, tagName, afterIdx) {
 export function violations(svg) {
   const out = []
   if (/<script/i.test(svg)) out.push("contains a <script> tag")
-  // strip the xmlns declaration, which is the only legitimate https reference
-  const stripped = svg.replace(/xmlns(:\w+)?="[^"]*"/g, "")
-  if (/https?:\/\//i.test(stripped)) out.push("contains an external https reference")
+  // Strip base64 data-URI payloads ([A-Za-z0-9+/=] can spell "NaN",
+  // "undefined" or "//" by chance) and the xmlns declaration, which is the
+  // only legitimate absolute URL.
+  const stripped = svg
+    .replace(/(data:[^,"')]*;base64,)[A-Za-z0-9+/=]*/gi, "$1")
+    .replace(/xmlns(:\w+)?="[^"]*"/g, "")
+  if (/(?:https?:)?\/\//i.test(stripped)) out.push("contains an external reference")
+  // A JS formatting bug (e.g. indexing past an array) leaks these literally.
+  for (const word of ["undefined", "NaN"]) {
+    if (stripped.includes(word)) out.push(`contains the literal text "${word}"`)
+  }
   if (!/<svg[^>]*\swidth="/.test(svg)) out.push("missing explicit width attribute")
   if (!/<svg[^>]*\sheight="/.test(svg)) out.push("missing explicit height attribute")
   if (!svg.includes("prefers-reduced-motion")) out.push("missing prefers-reduced-motion opt-out")
