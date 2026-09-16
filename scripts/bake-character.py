@@ -6,9 +6,9 @@ The daily generator only needs the contribution data.
 import base64, json, os, sys
 from PIL import Image
 
-SRC = sys.argv[1] if len(sys.argv) > 1 else r"C:\Users\Lychwee\Downloads\d6728c8a-2617-48ea-9921-346e4e875ea0.png"
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(os.path.dirname(HERE), "assets")
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(OUT_DIR, "character-source.png")
 
 # placement on the 900x400 card
 DEST_X, DEST_Y, DEST_W, DEST_H = 548.0, -6.0, 352.0, 440.0
