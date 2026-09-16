@@ -16,6 +16,8 @@ export function buildAll({ contrib, languages, matrix, repoCount, character }) {
   }
 }
 
+// cards/ is owned by CI. A local run with a personal token buckets contribution days
+// differently from the Actions token, so do not commit locally generated cards.
 async function main() {
   const token = process.env.GITHUB_TOKEN
   if (!token) throw new Error("GITHUB_TOKEN is required")

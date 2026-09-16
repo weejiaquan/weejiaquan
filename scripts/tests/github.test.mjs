@@ -74,3 +74,13 @@ test("rhythmMatrix ignores unparseable timestamps rather than throwing", () => {
   const m = rhythmMatrix(["not-a-date", "2026-01-05T02:00:00Z"], "America/Vancouver")
   assert.equal(m.flat().reduce((a, b) => a + b, 0), 1)
 })
+
+test("CONTRIB_QUERY only counts public repositories, whichever token runs it", async () => {
+  // A personal token also sees private repos; the Actions token does not. Without this
+  // filter a local run leaks private repo counts, languages and push times into the cards.
+  const { CONTRIB_QUERY } = await import("../lib/github.mjs")
+  const repoArgs = CONTRIB_QUERY.match(/repositories\(([^)]*)\)/)
+  assert.ok(repoArgs, "repositories(...) call not found in CONTRIB_QUERY")
+  console.log("repositories args:", repoArgs[1])
+  assert.match(repoArgs[1], /privacy\s*:\s*PUBLIC/)
+})
