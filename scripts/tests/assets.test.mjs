@@ -6,7 +6,7 @@ const cells = JSON.parse(readFileSync(new URL("../assets/character-cells.json", 
 const b64 = readFileSync(new URL("../assets/character-b64.txt", import.meta.url), "utf8").trim()
 
 test("baked geometry matches the hero card layout", () => {
-  assert.deepEqual(cells.dest, [566, 16, 310, 388])
+  assert.deepEqual(cells.dest, [564, 0, 336, 420])
   // soft edges are part of the layout contract: the card fades these, never hard-cuts
   assert.equal(typeof cells.fadeLen, "number")
   assert.equal(typeof cells.edgeFade, "number")

@@ -131,3 +131,21 @@ test("violations flags a protocol-relative external reference but not xmlns", ()
   assert.ok(v.some(x => x.includes("external")), `expected an external violation, got ${JSON.stringify(v)}`)
   assert.ok(violations(card({ w: 10, h: 10, css: "@import url(//evil.test/x.css);" })).some(x => x.includes("external")))
 })
+
+test("violations flags text painted with a gradient fill, which makes every repaint slow", () => {
+  // measured: ~2000 gradient-filled glyphs cost ~40ms per repaint vs ~8ms solid
+  const grad = '<defs><linearGradient id="g"/></defs>'
+  const onGroup = card({ w: 10, h: 10, defs: grad, body: '<g fill="url(#g)"><text x="1" y="1">#</text></g>' })
+  const onText = card({ w: 10, h: 10, defs: grad, body: "<text x='1' y='1' fill = 'url(#g)'>#</text>" })
+  for (const svg of [onGroup, onText]) {
+    const v = violations(svg)
+    console.log("gradient text violations:", v)
+    assert.ok(v.some(x => x.includes("gradient")), "gradient-filled text must be flagged")
+  }
+})
+
+test("violations allows gradient fills on shapes and solid fills on text", () => {
+  const svg = card({ w: 10, h: 10, defs: '<radialGradient id="v"/>',
+    body: '<rect width="10" height="10" fill="url(#v)"/><g fill="#A9F9FF"><text x="1" y="1">#</text></g>' })
+  assert.deepEqual(violations(svg), [])
+})

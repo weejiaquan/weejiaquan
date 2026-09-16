@@ -138,19 +138,51 @@ test("all readable text sits in the footer, below the art zone", () => {
   }
 })
 
-test("character sits fully inside the art zone, so nothing is hard-cropped by the card edge", () => {
+test("character fills the art zone to the top, right and bottom edges, with no gaps", () => {
   const [dx, dy, dw, dh] = character.baked.dest
   console.log("character box:", { dx, dy, right: dx + dw, bottom: dy + dh })
-  assert.ok(dy >= 0, "top edge would clip the halo")
-  assert.ok(dx + dw <= 900, "right edge would clip the ponytail")
-  assert.ok(dy + dh <= 420, "bottom edge would run into the footer")
+  assert.equal(dy, 0, "top: must start at the card edge (not sliced above it, no gap below it)")
+  assert.equal(dx + dw, 900, "right: must reach the card edge")
+  assert.equal(dy + dh, 420, "bottom: must reach the footer line")
+  const { fadeBottom, fadeLen } = character.baked
+  assert.equal(fadeBottom + fadeLen, 420, "bottom fade must finish exactly at the footer line")
 })
 
-test("character mask fades the right edge as well as the left and bottom", () => {
+test("character mask dissolves the left edge and lets the right edge bleed off the card", () => {
   const grad = svg.match(/<linearGradient id="mgx"[\s\S]*?<\/linearGradient>/)
   assert.ok(grad, "horizontal mask gradient missing")
   const stops = [...grad[0].matchAll(/stop-color="(#[0-9a-fA-F]+)"/g)].map(m => m[1].toLowerCase())
-  console.log("mgx stops:", stops)
+  console.log("mgx stops:", stops, "edgeFade:", character.baked.edgeFade)
   assert.equal(stops[0], "#000", "left edge must start transparent")
-  assert.equal(stops[stops.length - 1], "#000", "right edge must end transparent")
+  assert.equal(stops[stops.length - 1], character.baked.edgeFade > 0 ? "#000" : "#fff",
+    "right edge ends opaque when it bleeds, transparent when it fades")
+})
+
+test("hero renders the name as JQ over WEE", async () => {
+  const { NAME } = await import("../cards/hero.mjs")
+  assert.deepEqual(NAME, ["JQ", "WEE"])
+})
+
+test("hero has no SMIL at all, so nothing animates on the main thread every frame", () => {
+  assert.equal((svg.match(/<animate/g) || []).length, 0)
+})
+
+test("every hero animation steps at the shared frame rate, on a shared clock", async () => {
+  // Any change redraws the whole card. Stepping at FPS with delays on the same
+  // 1/FPS grid means at most FPS redraws a second instead of 60.
+  const { FPS } = await import("../cards/hero.mjs")
+  const frames = [...svg.matchAll(/@keyframes[^{]*\{((?:[^{}]*\{[^}]*\})*)\}/g)]
+  assert.ok(frames.length > 0, "expected keyframe animations")
+  for (const [, body] of frames) {
+    const moving = body.match(/\{[^}]*\}/g).length
+    assert.ok(/steps\(\d+\)/.test(body), `keyframes without steps(): ${body.slice(0, 80)}`)
+    assert.ok(moving >= 2)
+  }
+  const delays = [...svg.matchAll(/animation:\S+ ([\d.]+)s \S+ ([\d.]+)s infinite/g)]
+  assert.ok(delays.length > 0, "expected animation shorthand with duration and delay")
+  for (const [, dur, delay] of delays) {
+    for (const v of [Number(dur), Number(delay)]) {
+      assert.ok(Math.abs(v * FPS - Math.round(v * FPS)) < 1e-6, `${v}s is not on the 1/${FPS}s grid`)
+    }
+  }
 })

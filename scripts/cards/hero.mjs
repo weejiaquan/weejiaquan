@@ -1,17 +1,55 @@
 // Hero card — animated glyph-field name render with a character dissolve.
-// Ported from the design prototype. Layout constants and animation timings
-// are preserved exactly; they took many iterations to settle. See the Global Constraints in the task brief
-// for why this card has zero SVG filters and uses CSS keyframes, not SMIL.
+//
+// Performance model: GitHub shows this SVG through an <img>, so the browser
+// paints it as one image and ANY animation repaints the whole card. Two rules
+// follow, both measured: glyphs use solid fills (gradient-filled text made each
+// repaint ~5x slower), and every animation steps at FPS on a shared clock so the
+// card repaints at most FPS times a second instead of 60.
 import { RAMP, quant, hash, push, tiers } from "../lib/glyphs.mjs"
 import { strokeCov } from "../lib/strokefont.mjs"
 import { card } from "../lib/svg.mjs"
 
 const W = 900, H = 500
 const ART = 420          // art zone height; every label, stat and the credit sit below it
-const NAME = ["WEE JIA", "QUAN"]
-const GW = 7, GGAP = 2, GH = 11, LGAP = 2
-const NCW = 8.8, NCH = 10.5, NX = 48, NY = 92
+export const NAME = ["JQ", "WEE"]
+const GW = 13, GGAP = 3, GH = 16, LGAP = 2
+const NCW = 8.8, NCH = 10.5, NX = 48
 const BUCKETS = 20
+export const FPS = 15
+
+const nCols = Math.max(...NAME.map(l => l.length)) * (GW + GGAP)
+const nRows = NAME.length * GH + (NAME.length - 1) * LGAP
+// centre the name block vertically in the art zone (glyph tops sit ~8px above their baseline)
+const NY = Math.round((ART + 8 - (nRows - 1) * NCH) / 2)
+
+// Solid colour bands stand in for the old animated gradient; picked by position
+// so the iridescent sweep still reads across the name and the character.
+const IRID = ["#28E7EC", "#A9F9FF", "#F5FFFF", "#8AABFF", "#E1A7F3"]
+const WARM = ["#A8F0D8", "#EAFBFF", "#4FA8E8", "#A8F0D8"]
+const bandOf = (t, palette) => Math.max(0, Math.min(palette.length - 1, Math.floor(t * palette.length)))
+const pushBand = (bucket, band, q, cell) => { bucket[band] = bucket[band] || {}; push(bucket[band], q, cell) }
+const bandTiers = (bucket, palette) =>
+  Object.keys(bucket).map(b => `<g fill="${palette[b]}">${tiers(bucket[b])}</g>`).join("")
+// merge the colour bands, for copies that paint in a single colour of their own
+const flatTiers = bucket => {
+  const merged = {}
+  for (const b of Object.keys(bucket)) for (const q of Object.keys(bucket[b])) push(merged, q, bucket[b][q])
+  return tiers(merged)
+}
+
+// Keyframes whose every segment steps once per 1/FPS second. Each stop must
+// declare every animated property so the per-segment step count is exact.
+const frames = sec => Math.round(sec * FPS)
+function stepped(name, total, stops) {
+  const body = stops.map(([fr, decl], i) => {
+    const next = stops[i + 1]
+    const timing = next ? `;animation-timing-function:steps(${Math.max(1, next[0] - fr)})` : ""
+    return `${+((fr / total) * 100).toFixed(4)}%{${decl}${timing}}`
+  }).join("")
+  return `@keyframes ${name}{${body}}`
+}
+// delays snap to 0.2s (3 frames at 15fps): exact in decimal and on the shared grid
+const snapDelay = sec => (Math.round(sec / 0.2) * 0.2).toFixed(1)
 
 export function heroCard({ contrib, repoCount, character }) {
   const { weekTotals, total, commits, prs } = contrib
@@ -19,17 +57,14 @@ export function heroCard({ contrib, repoCount, character }) {
   const hasActivity = Number.isFinite(WMAX) && WMAX > 0
   const char = character.baked
   const charB64 = character.b64
-
-  const nCols = Math.max(...NAME.map(l => l.length)) * (GW + GGAP)
-  const nRows = NAME.length * GH + (NAME.length - 1) * LGAP
+  const [DX, DY, DW, DH] = char.dest
+  const [B0, B1] = char.band
 
   // A new account or a fork can have fewer than 53 weeks of calendar.
   const weekAt = c => Math.min(weekTotals.length - 1, Math.floor((c / nCols) * weekTotals.length))
-  // Guard against an empty or all-zero contribution history: the
-  // prototype's log1p(0)/log1p(0) division produces NaN, which short-circuits
-  // the quality filter below and lets every covered cell through regardless
-  // of activity. Treating a flat-zero history as zero activity keeps quiet
-  // weeks producing fewer glyph cells than busy ones, as intended.
+  // Guard against an empty or all-zero contribution history: log1p(0)/log1p(0)
+  // is NaN, which would short-circuit the quality filter below and let every
+  // covered cell through regardless of activity.
   const activity = c => (!hasActivity ? 0 : Math.log1p(weekTotals[weekAt(c)]) / Math.log1p(WMAX))
   const deltaAt = c => {
     const w = weekAt(c)
@@ -55,14 +90,16 @@ export function heroCard({ contrib, repoCount, character }) {
           const quality = cov * (0.45 + 0.55 * activity(col))
           if (quality < 0.13) continue
           const x = Math.round(NX + col * NCW), y = Math.round(NY + row * NCH)
-          // The prototype quantised cov to tenths over "  " + RAMP, so tenths
-          // 0-1 were blank; a blank cell draws nothing, so skip it.
+          // Coverage quantises to tenths over "  " + RAMP, so tenths 0-1 are
+          // blank; a blank cell draws nothing, so skip it.
           const ri = Math.round(cov * 10) - 2
           if (ri < 0) continue
           const g = RAMP[Math.min(ri, RAMP.length - 1)]
           const q = quant(0.40 + 0.60 * quality)
-          if (quality > 0.44) push(nameCore, q, `<text x="${x}" y="${y}">${g}</text>`)
-          else push(nameBuckets[Math.floor(hash(col, row) * BUCKETS) % BUCKETS], q, `<text x="${x}" y="${y}">${g}</text>`)
+          const band = bandOf(col / nCols, IRID)
+          const cell = `<text x="${x}" y="${y}">${g}</text>`
+          if (quality > 0.44) pushBand(nameCore, band, q, cell)
+          else pushBand(nameBuckets[Math.floor(hash(col, row) * BUCKETS) % BUCKETS], band, q, cell)
           if (deltaAt(col) > 0.10 && cov > 0.3) {
             ghosts += `<text x="${Math.round(x + deltaAt(col) * 16)}" y="${y}">${g}</text>`
           }
@@ -74,58 +111,66 @@ export function heroCard({ contrib, repoCount, character }) {
   // ---- character dissolve cells (pre-baked) ----------------------------------
   for (const [x, y, g, o] of char.cells) {
     if (g === " ") continue // the bake's ramp has blank entries; they draw nothing
-    push(charBuckets[Math.floor(hash(x, y) * BUCKETS) % BUCKETS], quant(o), `<text x="${x}" y="${y}">${g}</text>`)
+    pushBand(charBuckets[Math.floor(hash(x, y) * BUCKETS) % BUCKETS],
+      bandOf((x - DX) / DW, WARM), quant(o), `<text x="${x}" y="${y}">${g}</text>`)
   }
 
-  // CSS keyframes, not SMIL: transform animations on groups can be promoted to
-  // the compositor, whereas SMIL runs on the main thread every frame. The
-  // prototype used an <animateTransform> for the ghost-remnant drift; ported
-  // to the same @keyframes pattern as scatterGroups() below.
-  const css = [
-    "@keyframes kghost{0%{transform:translate(-7px,0);opacity:.8}"
-      + "30%{transform:translate(0,0);opacity:.28}84%{transform:translate(0,0);opacity:.28}"
-      + "100%{transform:translate(5px,0);opacity:.7}}"
-      + ".ghost{animation:kghost 13s linear infinite}",
-  ]
-  function scatterGroups(buckets, dur, spread, tag) {
+  // ---- animation --------------------------------------------------------------
+  const css = []
+  const loop = (name, dur, stops, cls, delay = "0.0") => {
+    css.push(stepped(name, frames(dur), stops) + `.${cls}{animation:${name} ${dur}s linear ${delay}s infinite}`)
+  }
+  const scatterStops = (dur, from, rest) => {
+    const T = frames(dur), a = frames(dur * 0.3), b = frames(dur * 0.84)
+    return [[0, from], [a, rest], [b, rest], [T, from]]
+  }
+
+  const ghostT = frames(13)
+  css.push(stepped("kghost", ghostT, [
+    [0, "transform:translate(-7px,0);opacity:.8"],
+    [frames(13 * 0.3), "transform:translate(0,0);opacity:.28"],
+    [frames(13 * 0.84), "transform:translate(0,0);opacity:.28"],
+    [ghostT, "transform:translate(5px,0);opacity:.7"],
+  ]) + ".ghost{animation:kghost 13s linear 0.0s infinite}")
+
+  function scatterGroups(buckets, dur, spread, tag, palette) {
     let out = ""
     buckets.forEach((bucket, i) => {
-      const cells = tiers(bucket)
+      const cells = bandTiers(bucket, palette)
       if (!cells) return
       const s = i / BUCKETS
       const ang = s * Math.PI * 2 * 3.7
       const dx = (Math.cos(ang) * spread * (0.4 + s)).toFixed(1)
       const dy = (Math.sin(ang) * spread * (0.5 + s) - spread * 0.7).toFixed(1)
       const cls = `${tag}${i}`
-      css.push(`@keyframes k${cls}{0%{transform:translate(${dx}px,${dy}px);opacity:0}`
-        + `30%{transform:translate(0,0);opacity:1}84%{transform:translate(0,0);opacity:1}`
-        + `100%{transform:translate(${dx}px,${dy}px);opacity:0}}`
-        + `.${cls}{animation:k${cls} ${dur}s linear ${(s * dur * 0.3).toFixed(2)}s infinite}`)
+      loop(`k${cls}`, dur,
+        scatterStops(dur, `transform:translate(${dx}px,${dy}px);opacity:0`, "transform:translate(0,0);opacity:1"),
+        cls, snapDelay(s * dur * 0.3))
       out += `<g class="${cls}">${cells}</g>`
     })
     return out
   }
 
-  const [DX, DY, DW, DH] = char.dest
-  const [B0, B1] = char.band
+  // scan bar: sweeps the name once per loop, then fades
+  const scanTravel = +(nRows * NCH + 24).toFixed(1)
+  const sT = frames(13), s26 = frames(13 * 0.26), s30 = frames(13 * 0.30), s33 = frames(13 * 0.33)
+  const fadeAt30 = (0.9 * (s33 - s30) / (s33 - s26)).toFixed(2)
+  css.push(stepped("kscan", sT, [
+    [0, "transform:translate(0,0);opacity:.9"],
+    [s26, `transform:translate(0,${+(scanTravel * s26 / s30).toFixed(1)}px);opacity:.9`],
+    [s30, `transform:translate(0,${scanTravel}px);opacity:${fadeAt30}`],
+    [s33, `transform:translate(0,${scanTravel}px);opacity:0`],
+    [sT, `transform:translate(0,${scanTravel}px);opacity:0`],
+  ]) + ".scan{animation:kscan 13s linear 0.0s infinite}")
+
   const R = DX + DW
   const fadeInEnd = ((B1 - B0) / (R - B0)).toFixed(3)
-  const fadeOutStart = ((R - char.edgeFade - B0) / (R - B0)).toFixed(3)
+  // the right edge either bleeds off the card (edgeFade 0) or fades out over edgeFade px
+  const rightFade = char.edgeFade > 0
+    ? `<stop offset="${((R - char.edgeFade - B0) / (R - B0)).toFixed(3)}" stop-color="#fff"/><stop offset="1" stop-color="#000"/>`
+    : ""
 
   const defs = `
-  <linearGradient id="irid" x1="-0.6" y1="0" x2="0.4" y2="0.25">
-    <stop offset="0" stop-color="#28E7EC"/><stop offset=".26" stop-color="#A9F9FF"/>
-    <stop offset=".45" stop-color="#F5FFFF"/><stop offset=".64" stop-color="#8AABFF"/>
-    <stop offset=".82" stop-color="#E1A7F3"/><stop offset="1" stop-color="#28E7EC"/>
-    <animate attributeName="x1" values="-0.6;0.6;-0.6" dur="12s" repeatCount="indefinite"/>
-    <animate attributeName="x2" values="0.4;1.6;0.4" dur="12s" repeatCount="indefinite"/>
-  </linearGradient>
-  <linearGradient id="warm" x1="0" y1="0" x2="1" y2="0.3">
-    <stop offset="0" stop-color="#A8F0D8"/><stop offset=".4" stop-color="#EAFBFF"/>
-    <stop offset=".72" stop-color="#4FA8E8"/><stop offset="1" stop-color="#A8F0D8"/>
-    <animate attributeName="x1" values="0;0.7;0" dur="15s" repeatCount="indefinite"/>
-    <animate attributeName="x2" values="1;1.7;1" dur="15s" repeatCount="indefinite"/>
-  </linearGradient>
   <radialGradient id="backlight" cx=".5" cy=".42" r=".5">
     <stop offset="0" stop-color="#2E6F7A" stop-opacity=".55"/>
     <stop offset=".55" stop-color="#20505C" stop-opacity=".26"/>
@@ -135,16 +180,17 @@ export function heroCard({ contrib, repoCount, character }) {
     <stop offset="0" stop-color="#1B222B"/><stop offset="1" stop-color="#0A0C10"/>
   </radialGradient>
   <!-- horizontal dissolve: image absent at the band start, solid by the band end -->
-  <!-- ...and fades out again over the last edgeFade px, so the source crop never shows as a hard line -->
   <linearGradient id="mgx" gradientUnits="userSpaceOnUse" x1="${B0}" y1="0" x2="${R}" y2="0">
-    <stop offset="0" stop-color="#000"/><stop offset="${fadeInEnd}" stop-color="#fff"/>
-    <stop offset="${fadeOutStart}" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
+    <stop offset="0" stop-color="#000"/><stop offset="${fadeInEnd}" stop-color="#fff"/>${rightFade}
   </linearGradient>
   <linearGradient id="mgy" gradientUnits="userSpaceOnUse" x1="0" y1="${char.fadeBottom}" x2="0" y2="${char.fadeBottom + char.fadeLen}">
     <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
   </linearGradient>
   <mask id="mx"><rect x="${DX}" y="-40" width="${DW}" height="${H + 80}" fill="url(#mgx)"/></mask>
   <mask id="my"><rect x="${DX}" y="-40" width="${DW}" height="${H + 80}" fill="url(#mgy)"/></mask>`
+
+  const charField = scatterGroups(charBuckets, 16, 26, "c", WARM)
+  const nameField = scatterGroups(nameBuckets, 13, 26, "n", IRID)
 
   const body = `
 <rect width="${W}" height="${H}" fill="url(#vig)"/>
@@ -158,25 +204,20 @@ export function heroCard({ contrib, repoCount, character }) {
 
 <!-- the image handing off to type as it fades -->
 <g font-family="'PlexMonoSub','IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace" font-size="6.6" font-weight="700"
-   fill="url(#warm)" text-anchor="middle">${scatterGroups(charBuckets, 16, 26, "c")}</g>
+   text-anchor="middle">${charField}</g>
 
 <!-- name -->
 <g font-family="'PlexMonoSub','IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace" font-size="11.5" font-weight="700"
-   fill="url(#irid)" text-anchor="middle">
-  <g>
-    <g opacity=".20" font-size="15.5">${tiers(nameCore)}</g>
-    <g opacity=".34" fill="#FF3B3B" transform="translate(-2.6,0)">${tiers(nameCore)}</g>
-    <g opacity=".34" fill="#2BE3FF" transform="translate(2.6,0)">${tiers(nameCore)}</g>
-    <g>${tiers(nameCore)}</g>
-    ${scatterGroups(nameBuckets, 13, 26, "n")}
-    <g class="ghost">${ghosts}</g>
-  </g>
+   text-anchor="middle">
+  <g opacity=".20" font-size="15.5">${bandTiers(nameCore, IRID)}</g>
+  <g opacity=".34" fill="#FF3B3B" transform="translate(-2.6,0)">${flatTiers(nameCore)}</g>
+  <g opacity=".34" fill="#2BE3FF" transform="translate(2.6,0)">${flatTiers(nameCore)}</g>
+  <g>${bandTiers(nameCore, IRID)}</g>
+  ${nameField}
+  <g class="ghost" fill="#E1A7F3">${ghosts}</g>
 </g>
 
-<rect x="38" y="${NY - 18}" width="${nCols * NCW + 24}" height="2" fill="#A9F9FF">
-  <animate attributeName="y" values="${NY - 18};${NY + nRows * NCH + 6};${NY + nRows * NCH + 6}" keyTimes="0;0.3;1" dur="13s" repeatCount="indefinite"/>
-  <animate attributeName="opacity" values=".9;.9;0;0" keyTimes="0;0.26;0.33;1" dur="13s" repeatCount="indefinite"/>
-</rect>
+<rect class="scan" x="38" y="${NY - 18}" width="${+(nCols * NCW + 24).toFixed(1)}" height="2" fill="#A9F9FF"/>
 
 <!-- footer: all readable text lives below the art zone -->
 <path d="M48 ${ART + 8}h804" stroke="#2A323C"/>

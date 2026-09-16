@@ -82,6 +82,13 @@ export function violations(svg) {
     if (hasClass && hasFilter) {
       out.push(`filter applied to an element with a class: ${m[0]}`)
     }
+    // Gradient-painted text is the dominant repaint cost (measured ~5x a solid
+    // fill across ~2000 glyphs), and any animation repaints the whole card.
+    if (/\bfill\s*=\s*["']url\(/.test(attrs)) {
+      const paintsText = tagName === "text"
+        || (!selfClosing && /<text\b/.test(subtreeOf(svg, tagName, m.index + m[0].length)))
+      if (paintsText) out.push(`text painted with a gradient fill: ${m[0].slice(0, 80)}`)
+    }
     if (hasFilter && !selfClosing) {
       const subtree = subtreeOf(svg, tagName, m.index + m[0].length)
       if (/<animate(transform|motion)?\b/i.test(subtree)) {

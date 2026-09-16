@@ -11,13 +11,16 @@ OUT_DIR = os.path.join(HERE, "assets")
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(OUT_DIR, "character-source.png")
 
 # placement inside the hero's 420px art zone (card is 900x500, text lives in the footer).
-# The box sits fully inside the card so no edge is hard-cropped; every edge fades instead.
-DEST_X, DEST_Y, DEST_W, DEST_H = 566.0, 16.0, 310.0, 388.0
+# The box fills the art zone to the top, right and bottom edges (it bleeds off the
+# card) so there are no empty gaps. The left side dissolves into glyphs and the
+# bottom fades out exactly at the footer line, so neither shows a hard edge.
+ART = 420.0
+DEST_X, DEST_Y, DEST_W, DEST_H = 564.0, 0.0, 336.0, ART
 # horizontal dissolve band: fully glyphs at BAND_X0, fully image by BAND_X1
-BAND_X0, BAND_X1 = 560.0, 700.0
-FADE_BOTTOM_Y = 336.0
-FADE_LEN = 68.0        # bottom fade length: fully gone at FADE_BOTTOM_Y + FADE_LEN
-EDGE_FADE = 40.0       # right-edge fade length, so the source crop never shows as a line
+BAND_X0, BAND_X1 = 558.0, 700.0
+FADE_LEN = 60.0        # bottom fade length
+FADE_BOTTOM_Y = ART - FADE_LEN   # fully gone at the footer line
+EDGE_FADE = 0.0        # right edge bleeds off the card; set > 0 to fade it instead
 CW, CH = 4.8, 5.8
 RAMP = "  .:-=+*#%@"
 
@@ -46,7 +49,7 @@ for r in range(rows):
         # image alpha at this point: how much the mask keeps
         keep_x = 0.0 if cx <= BAND_X0 else min(1.0, (cx - BAND_X0) / (BAND_X1 - BAND_X0))
         keep_y = 1.0 if cy <= FADE_BOTTOM_Y else max(0.0, 1.0 - (cy - FADE_BOTTOM_Y) / FADE_LEN)
-        keep_r = max(0.0, min(1.0, (DEST_X + DEST_W - cx) / EDGE_FADE))
+        keep_r = 1.0 if EDGE_FADE <= 0 else max(0.0, min(1.0, (DEST_X + DEST_W - cx) / EDGE_FADE))
         keep = keep_x * keep_y * keep_r
         if keep > 0.97:
             continue                      # solid image here, no glyphs needed
