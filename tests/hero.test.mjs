@@ -7,7 +7,7 @@ import { violations } from "../scripts/lib/svg.mjs"
 import { RAMP } from "../scripts/lib/glyphs.mjs"
 
 const character = {
-  cells: JSON.parse(readFileSync(new URL("../assets/character-cells.json", import.meta.url))),
+  baked: JSON.parse(readFileSync(new URL("../assets/character-cells.json", import.meta.url))),
   b64: readFileSync(new URL("../assets/character-b64.txt", import.meta.url), "utf8").trim(),
 }
 const contrib = {
@@ -53,7 +53,7 @@ test("hero card is deterministic for identical input", () => {
 // Name-layer cells only: render with no character cells, then map each glyph
 // position to the brightest opacity tier it appears in (core cells are drawn
 // several times for the chromatic split).
-const nameOnly = { ...character, cells: { ...character.cells, cells: [] } }
+const nameOnly = { ...character, baked: { ...character.baked, cells: [] } }
 function nameCells(weekTotals) {
   const out = heroCard({ contrib: { ...contrib, weekTotals }, repoCount: 48, character: nameOnly })
   const pos = new Map()

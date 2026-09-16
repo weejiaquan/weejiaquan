@@ -6,9 +6,8 @@ export const CONTRIB_QUERY = `query($login:String!){
       totalPullRequestContributions
     }
     repositories(first:100, ownerAffiliations:OWNER, isFork:false, orderBy:{field:STARGAZERS, direction:DESC}){
-      nodes{ name description stargazerCount url pushedAt primaryLanguage{ name } }
+      nodes{ name pushedAt primaryLanguage{ name } }
     }
-    followers{ totalCount }
   }
 }`
 

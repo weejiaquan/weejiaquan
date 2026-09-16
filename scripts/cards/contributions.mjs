@@ -1,4 +1,4 @@
-import { RAMP, glyphFor, quant, push, tiers } from "../lib/glyphs.mjs"
+import { glyphFor, quant, push, tiers } from "../lib/glyphs.mjs"
 import { card, PALETTE } from "../lib/svg.mjs"
 
 const W = 900, H = 190

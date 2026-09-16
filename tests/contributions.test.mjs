@@ -24,9 +24,14 @@ test("contributions card is completely static", () => {
   assert.ok(!svg.includes("@keyframes"))
 })
 
-test("contributions card draws one cell per day of the year", () => {
-  const cells = (svg.match(/<text/g) || []).length
-  assert.ok(cells >= 53 * 7, `expected at least 371 day cells, got ${cells}`)
+// Grid cells carry exactly x and y; header and total <text> nodes carry font attributes.
+const gridCells = s => (s.match(/<text x="\d+" y="\d+">[^<]<\/text>/g) || []).length
+
+test("contributions card draws exactly one cell per day of the year", () => {
+  const cells = gridCells(svg)
+  console.log(`contributions grid cells: ${cells}, all <text>: ${(svg.match(/<text/g) || []).length}`)
+  assert.equal(cells, 53 * 7)
+  assert.equal(gridCells(contributionsCard({ contrib: { ...contrib, weeks: contrib.weeks.slice(0, 3) } })), 3 * 7)
 })
 
 test("a zero day renders the sparsest glyph and the max day the densest", () => {

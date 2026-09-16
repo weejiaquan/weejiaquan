@@ -24,6 +24,7 @@ jobs:
       - name: Generate cards
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_LOGIN: ${{ github.repository_owner }}
         run: node scripts/generate.mjs
       - name: Commit if changed
         run: |

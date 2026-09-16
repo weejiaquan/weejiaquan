@@ -27,6 +27,6 @@ export function rhythmCard({ matrix }) {
     + `<g font-family="'PlexMonoSub','IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="700" `
     + `fill="${PALETTE.blue}" text-anchor="middle">${tiers(buckets)}</g>${dayLabels}`
     + `<text x="28" y="188" font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" font-size="8" fill="${PALETTE.dim}" `
-    + `letter-spacing="2">PUBLIC COMMIT SAMPLE ／ VANCOUVER TIME</text>`
+    + `letter-spacing="2">LAST PUSH PER REPO ／ VANCOUVER TIME</text>`
   return card({ w: W, h: H, body })
 }

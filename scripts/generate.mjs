@@ -23,6 +23,7 @@ async function main() {
 
   const data = await fetchGraphQL(CONTRIB_QUERY, token, { login })
   const contrib = normalizeContributions(data)
+  // CONTRIB_QUERY fetches first:100 repositories, so repoCount caps at 100.
   const nodes = data.user.repositories.nodes
   const languages = normalizeLanguages(nodes)
 
@@ -31,7 +32,7 @@ async function main() {
   const matrix = rhythmMatrix(nodes.map(n => n.pushedAt).filter(Boolean), "America/Vancouver")
 
   const character = {
-    cells: JSON.parse(readFileSync(new URL("../assets/character-cells.json", import.meta.url))),
+    baked: JSON.parse(readFileSync(new URL("../assets/character-cells.json", import.meta.url))),
     b64: readFileSync(new URL("../assets/character-b64.txt", import.meta.url), "utf8").trim(),
   }
 

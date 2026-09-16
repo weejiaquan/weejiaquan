@@ -5,7 +5,7 @@ import { buildAll } from "../scripts/generate.mjs"
 import { violations } from "../scripts/lib/svg.mjs"
 
 const character = {
-  cells: JSON.parse(readFileSync(new URL("../assets/character-cells.json", import.meta.url))),
+  baked: JSON.parse(readFileSync(new URL("../assets/character-cells.json", import.meta.url))),
   b64: readFileSync(new URL("../assets/character-b64.txt", import.meta.url), "utf8").trim(),
 }
 const input = {

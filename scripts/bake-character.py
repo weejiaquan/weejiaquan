@@ -3,7 +3,7 @@
 The character never changes, so this runs once and its output is committed.
 The daily generator only needs the contribution data.
 """
-import base64, json, os, sys
+import base64, json, os, sys, tempfile
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -21,9 +21,12 @@ RAMP = "  .:-=+*#%@"
 im = Image.open(SRC).convert("RGBA").crop(Image.open(SRC).convert("RGBA").getbbox())
 ENC_W = 520
 enc = im.resize((ENC_W, round(im.size[1] * ENC_W / im.size[0])), Image.LANCZOS)
-webp = os.path.join(OUT_DIR, "character.webp")
-enc.save(webp, "WEBP", quality=82, method=6)
-b64 = base64.b64encode(open(webp, "rb").read()).decode()
+# only the base64 is committed; the webp is an intermediate
+with tempfile.TemporaryDirectory() as tmp:
+    webp = os.path.join(tmp, "character.webp")
+    enc.save(webp, "WEBP", quality=82, method=6)
+    webp_bytes = open(webp, "rb").read()
+b64 = base64.b64encode(webp_bytes).decode()
 
 # ---- sample the dissolve band -------------------------------------------------
 px = enc.load()
@@ -78,5 +81,5 @@ out = {
 json.dump(out, open(os.path.join(OUT_DIR, "character-cells.json"), "w"))
 open(os.path.join(OUT_DIR, "character-b64.txt"), "w").write(b64)
 
-print(f"encoded {enc.size[0]}x{enc.size[1]}  webp={os.path.getsize(webp)//1024}KB  "
+print(f"encoded {enc.size[0]}x{enc.size[1]}  webp={len(webp_bytes)//1024}KB  "
       f"base64={len(b64)//1024}KB  dissolve cells={len(cells)}")

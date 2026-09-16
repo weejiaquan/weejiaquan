@@ -44,9 +44,16 @@ test("languages card never leaks the literal text \"undefined\" for an empty lan
   assert.ok(!languagesCard({ languages: [] }).includes("undefined"))
 })
 
-test("rhythm card draws a 24x7 grid", () => {
-  const cells = (rhythmCard({ matrix }).match(/<text/g) || []).length
-  assert.ok(cells >= 24 * 7, `expected at least 168 cells, got ${cells}`)
+test("rhythm card draws exactly a 24x7 grid", () => {
+  const svg = rhythmCard({ matrix })
+  // grid cells carry exactly x and y; day and caption labels carry font attributes
+  const cells = (svg.match(/<text x="\d+" y="\d+">[^<]<\/text>/g) || []).length
+  console.log(`rhythm grid cells: ${cells}, all <text>: ${(svg.match(/<text/g) || []).length}`)
+  assert.equal(cells, 24 * 7)
+})
+
+test("rhythm card labels its data honestly as one push per repo", () => {
+  assert.ok(rhythmCard({ matrix }).includes("LAST PUSH PER REPO"))
 })
 
 test("rhythm card handles an all-zero matrix", () => {

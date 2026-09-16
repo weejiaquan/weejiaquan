@@ -16,7 +16,7 @@ export function heroCard({ contrib, repoCount, character }) {
   const { weekTotals, total, commits, prs } = contrib
   const WMAX = Math.max(...weekTotals) // -Infinity for an empty calendar
   const hasActivity = Number.isFinite(WMAX) && WMAX > 0
-  const char = character.cells
+  const char = character.baked
   const charB64 = character.b64
 
   const nCols = Math.max(...NAME.map(l => l.length)) * (GW + GGAP)
