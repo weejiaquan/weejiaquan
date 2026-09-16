@@ -69,8 +69,8 @@
   <text x="852" y="452" text-anchor="end" font-size="9" fill="#5F6E7E" letter-spacing="1.8">ART @Azzinhee</text>
 </g>
 <g font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" fill="#EAF6FF">
-  <text x="48" y="484" font-size="20" font-weight="500" letter-spacing="-.4">4,708<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">CONTRIB</tspan></text>
-  <text x="206" y="484" font-size="20" font-weight="500">4,015<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">COMMITS</tspan></text>
+  <text x="48" y="484" font-size="20" font-weight="500" letter-spacing="-.4">4,709<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">CONTRIB</tspan></text>
+  <text x="206" y="484" font-size="20" font-weight="500">4,016<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">COMMITS</tspan></text>
   <text x="372" y="484" font-size="20" font-weight="500">597<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">PR</tspan></text>
   <text x="488" y="484" font-size="20" font-weight="500">49<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">REPOS</tspan></text>
 </g></svg>
