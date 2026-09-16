@@ -1,7 +1,7 @@
-// tests/glyphs.test.mjs
+// scripts/tests/glyphs.test.mjs
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { RAMP, glyphFor, quant, hash, push, tiers } from "../scripts/lib/glyphs.mjs"
+import { RAMP, glyphFor, quant, hash, push, tiers } from "../lib/glyphs.mjs"
 
 test("RAMP runs sparse to dense with no leading blank", () => {
   assert.equal(RAMP, ".:-=+*#%@")

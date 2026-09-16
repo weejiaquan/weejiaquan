@@ -1,7 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
-import { card, FONT_FACE_CSS } from "../scripts/lib/svg.mjs"
+import { card, FONT_FACE_CSS } from "../lib/svg.mjs"
 
 test("font subsets are committed as raw base64 woff2", () => {
   for (const f of ["plex-mono-subset.txt", "geist-subset.txt"]) {

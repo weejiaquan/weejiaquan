@@ -1,7 +1,7 @@
-// tests/svg.test.mjs
+// scripts/tests/svg.test.mjs
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { card, violations, PALETTE } from "../scripts/lib/svg.mjs"
+import { card, violations, PALETTE } from "../lib/svg.mjs"
 
 test("card emits explicit width and height alongside viewBox", () => {
   const s = card({ w: 900, h: 440, body: "<rect/>" })

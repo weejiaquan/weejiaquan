@@ -1,8 +1,8 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { contributionsCard } from "../scripts/cards/contributions.mjs"
-import { violations } from "../scripts/lib/svg.mjs"
-import { RAMP } from "../scripts/lib/glyphs.mjs"
+import { contributionsCard } from "../cards/contributions.mjs"
+import { violations } from "../lib/svg.mjs"
+import { RAMP } from "../lib/glyphs.mjs"
 
 const contrib = {
   weeks: Array.from({ length: 53 }, (_, w) => Array.from({ length: 7 }, (_, d) => (w * 7 + d) % 12)),

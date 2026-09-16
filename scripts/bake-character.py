@@ -7,7 +7,7 @@ import base64, json, os, sys, tempfile
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT_DIR = os.path.join(os.path.dirname(HERE), "assets")
+OUT_DIR = os.path.join(HERE, "assets")
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(OUT_DIR, "character-source.png")
 
 # placement on the 900x400 card

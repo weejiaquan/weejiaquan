@@ -1,7 +1,7 @@
-// tests/strokefont.test.mjs
+// scripts/tests/strokefont.test.mjs
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { STROKES, strokeCov } from "../scripts/lib/strokefont.mjs"
+import { STROKES, strokeCov } from "../lib/strokefont.mjs"
 
 test("every glyph needed by the name is defined", () => {
   for (const ch of "WEE JIA QUAN") assert.ok(STROKES[ch], `missing glyph: ${JSON.stringify(ch)}`)

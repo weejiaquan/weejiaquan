@@ -1,10 +1,10 @@
-// tests/hero.test.mjs
+// scripts/tests/hero.test.mjs
 import { test } from "node:test"
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
-import { heroCard } from "../scripts/cards/hero.mjs"
-import { violations } from "../scripts/lib/svg.mjs"
-import { RAMP } from "../scripts/lib/glyphs.mjs"
+import { heroCard } from "../cards/hero.mjs"
+import { violations } from "../lib/svg.mjs"
+import { RAMP } from "../lib/glyphs.mjs"
 
 const character = {
   baked: JSON.parse(readFileSync(new URL("../assets/character-cells.json", import.meta.url))),

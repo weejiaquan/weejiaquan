@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs"
 
-const readB64 = f => readFileSync(new URL(`../../assets/fonts/${f}`, import.meta.url), "utf8").trim()
+const readB64 = f => readFileSync(new URL(`../assets/fonts/${f}`, import.meta.url), "utf8").trim()
 
 // Read once at import time, so the font assets must exist before this module loads.
 export const FONT_FACE_CSS =

@@ -1,8 +1,8 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 import { readdirSync, readFileSync } from "node:fs"
-import { buildAll } from "../scripts/generate.mjs"
-import { violations } from "../scripts/lib/svg.mjs"
+import { buildAll } from "../generate.mjs"
+import { violations } from "../lib/svg.mjs"
 
 const character = {
   baked: JSON.parse(readFileSync(new URL("../assets/character-cells.json", import.meta.url))),
@@ -50,7 +50,7 @@ test("buildAll is deterministic so unchanged data produces no commit", () => {
 
 test("every committed card on disk obeys every global constraint", () => {
   // what visitors actually see: the files in cards/ as committed
-  const dir = new URL("../cards/", import.meta.url)
+  const dir = new URL("../../cards/", import.meta.url)
   const files = readdirSync(dir).filter(f => f.endsWith(".svg")).sort()
   assert.deepEqual(files, ["contributions.svg", "hero.svg", "languages.svg", "rhythm.svg"])
   for (const f of files) {

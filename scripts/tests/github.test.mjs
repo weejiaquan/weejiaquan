@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { normalizeContributions, normalizeLanguages, rhythmMatrix } from "../scripts/lib/github.mjs"
+import { normalizeContributions, normalizeLanguages, rhythmMatrix } from "../lib/github.mjs"
 
 const sample = {
   user: {

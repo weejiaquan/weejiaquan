@@ -8,7 +8,7 @@ import base64, os, sys
 from fontTools import subset
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "assets", "fonts")
+OUT = os.path.join(HERE, "assets", "fonts")
 GLYPHS = (".:-=+*#%@0123456789"
           "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
           " ,./·■／貢献言語時刻読取")

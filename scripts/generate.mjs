@@ -32,8 +32,8 @@ async function main() {
   const matrix = rhythmMatrix(nodes.map(n => n.pushedAt).filter(Boolean), "America/Vancouver")
 
   const character = {
-    baked: JSON.parse(readFileSync(new URL("../assets/character-cells.json", import.meta.url))),
-    b64: readFileSync(new URL("../assets/character-b64.txt", import.meta.url), "utf8").trim(),
+    baked: JSON.parse(readFileSync(new URL("./assets/character-cells.json", import.meta.url))),
+    b64: readFileSync(new URL("./assets/character-b64.txt", import.meta.url), "utf8").trim(),
   }
 
   mkdirSync(new URL("../cards/", import.meta.url), { recursive: true })

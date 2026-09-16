@@ -1,8 +1,8 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { languagesCard } from "../scripts/cards/languages.mjs"
-import { rhythmCard } from "../scripts/cards/rhythm.mjs"
-import { violations } from "../scripts/lib/svg.mjs"
+import { languagesCard } from "../cards/languages.mjs"
+import { rhythmCard } from "../cards/rhythm.mjs"
+import { violations } from "../lib/svg.mjs"
 
 const languages = [
   { name: "JavaScript", count: 16 }, { name: "Python", count: 12 },
