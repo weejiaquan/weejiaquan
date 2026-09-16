@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { buildAll } from "../scripts/generate.mjs"
 import { violations } from "../scripts/lib/svg.mjs"
 
@@ -46,4 +46,16 @@ test("total payload across all four cards stays under 400KB", () => {
 
 test("buildAll is deterministic so unchanged data produces no commit", () => {
   assert.deepEqual(buildAll(input), buildAll(input))
+})
+
+test("every committed card on disk obeys every global constraint", () => {
+  // what visitors actually see: the files in cards/ as committed
+  const dir = new URL("../cards/", import.meta.url)
+  const files = readdirSync(dir).filter(f => f.endsWith(".svg")).sort()
+  assert.deepEqual(files, ["contributions.svg", "hero.svg", "languages.svg", "rhythm.svg"])
+  for (const f of files) {
+    const v = violations(readFileSync(new URL(f, dir), "utf8"))
+    console.log(`cards/${f}: ${v.length} violation(s)${v.length ? " " + JSON.stringify(v.slice(0, 3)) : ""}`)
+    assert.deepEqual(v, [], `cards/${f} violated constraints`)
+  }
 })
