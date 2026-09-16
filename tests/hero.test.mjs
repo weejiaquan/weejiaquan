@@ -4,6 +4,7 @@ import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import { heroCard } from "../scripts/cards/hero.mjs"
 import { violations } from "../scripts/lib/svg.mjs"
+import { RAMP } from "../scripts/lib/glyphs.mjs"
 
 const character = {
   cells: JSON.parse(readFileSync(new URL("../assets/character-cells.json", import.meta.url))),
@@ -49,10 +50,74 @@ test("hero card is deterministic for identical input", () => {
   assert.equal(heroCard({ contrib, repoCount: 48, character }), svg)
 })
 
-test("quiet weeks lose more glyph cells than busy weeks", () => {
-  const busy = { ...contrib, weekTotals: new Array(53).fill(200) }
-  const quiet = { ...contrib, weekTotals: new Array(53).fill(0) }
-  const busyCount = (heroCard({ contrib: busy, repoCount: 48, character }).match(/<text/g) || []).length
-  const quietCount = (heroCard({ contrib: quiet, repoCount: 48, character }).match(/<text/g) || []).length
-  assert.ok(busyCount > quietCount, `busy ${busyCount} should exceed quiet ${quietCount}`)
+// Name-layer cells only: render with no character cells, then map each glyph
+// position to the brightest opacity tier it appears in (core cells are drawn
+// several times for the chromatic split).
+const nameOnly = { ...character, cells: { ...character.cells, cells: [] } }
+function nameCells(weekTotals) {
+  const out = heroCard({ contrib: { ...contrib, weekTotals }, repoCount: 48, character: nameOnly })
+  const pos = new Map()
+  for (const t of out.matchAll(/<g opacity="([\d.]+)">((?:<text x="-?\d+" y="-?\d+">[^<]*<\/text>)+)<\/g>/g)) {
+    for (const c of t[2].matchAll(/<text x="(-?\d+)" y="(-?\d+)">/g)) {
+      const k = `${c[1]},${c[2]}`
+      pos.set(k, Math.max(pos.get(k) || 0, Number(t[1])))
+    }
+  }
+  return [...pos].map(([k, o]) => ({ x: Number(k.split(",")[0]), o }))
+}
+const meanOpacity = cells => cells.reduce((a, c) => a + c.o, 0) / cells.length
+// 63 name columns map onto 53 weeks: columns 0-30 are weeks 0-25 (x <= 330),
+// columns 31+ are weeks 26+ (x >= 339).
+const LEFT = c => c.x <= 330, RIGHT = c => c.x >= 339
+
+test("busy weeks render the name brighter and fuller than quiet weeks", () => {
+  const busy = nameCells(new Array(53).fill(200))
+  const quiet = nameCells(new Array(53).fill(0))
+  console.log(`busy: ${busy.length} cells, mean opacity ${meanOpacity(busy).toFixed(3)}; `
+    + `quiet: ${quiet.length} cells, mean opacity ${meanOpacity(quiet).toFixed(3)}`)
+  assert.ok(busy.length > quiet.length, `busy ${busy.length} should exceed quiet ${quiet.length}`)
+  assert.ok(meanOpacity(busy) - meanOpacity(quiet) > 0.15, "activity must visibly brighten the name")
+})
+
+test("activity is placed by week: a busy half brightens only its side of the name", () => {
+  const halves = {
+    firstBusy: nameCells(Array.from({ length: 53 }, (_, i) => (i < 26 ? 200 : 0))),
+    secondBusy: nameCells(Array.from({ length: 53 }, (_, i) => (i < 26 ? 0 : 200))),
+  }
+  for (const [name, cells] of Object.entries(halves)) {
+    const l = meanOpacity(cells.filter(LEFT)), r = meanOpacity(cells.filter(RIGHT))
+    console.log(`${name}: left mean opacity ${l.toFixed(3)}, right ${r.toFixed(3)}`)
+    if (name === "firstBusy") assert.ok(l - r > 0.15, `${name}: left should be brighter`)
+    else assert.ok(r - l > 0.15, `${name}: right should be brighter`)
+  }
+})
+
+// Glyph cells are the only <text> nodes carrying exactly x and y attributes;
+// headline and label <text> nodes all carry font or fill attributes.
+const glyphCells = s => [...s.matchAll(/<text x="-?\d+" y="-?\d+">([^<]*)<\/text>/g)].map(m => m[1])
+
+test("every hero glyph cell is a single character from RAMP", () => {
+  const glyphs = glyphCells(svg)
+  const bad = glyphs.filter(g => g.length !== 1 || !RAMP.includes(g))
+  const hist = {}
+  for (const g of glyphs) hist[g] = (hist[g] || 0) + 1
+  console.log(`hero glyph cells: ${glyphs.length}, histogram ${JSON.stringify(hist)}`)
+  assert.ok(glyphs.length > 500, `expected hundreds of glyph cells, got ${glyphs.length}`)
+  assert.equal(bad.length, 0, `non-RAMP glyph contents: ${JSON.stringify([...new Set(bad)])}`)
+})
+
+test("hero card survives a short calendar (3 weeks, e.g. a brand-new account)", () => {
+  const short = { ...contrib, weeks: contrib.weeks.slice(0, 3), weekTotals: [4, 0, 9] }
+  const out = heroCard({ contrib: short, repoCount: 1, character })
+  const v = violations(out)
+  console.log("short calendar ->", v)
+  assert.deepEqual(v, [])
+})
+
+test("hero card survives an empty calendar", () => {
+  const empty = { ...contrib, weeks: [], weekTotals: [], total: 0, commits: 0, prs: 0, max: 0 }
+  const out = heroCard({ contrib: empty, repoCount: 0, character })
+  const v = violations(out)
+  console.log("empty calendar ->", v)
+  assert.deepEqual(v, [])
 })

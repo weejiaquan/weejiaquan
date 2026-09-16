@@ -1,6 +1,5 @@
 // Hero card — animated glyph-field name render with a character dissolve.
-// Ported from the prototype at .superpowers/brainstorm/3852-1789543969/gen-v8.cjs.
-// Layout constants and animation timings are preserved exactly; they took
+// Ported from the design prototype. Layout constants and animation timings are preserved exactly; they took
 // many iterations to settle. See the Global Constraints in the task brief
 // for why this card has zero SVG filters and uses CSS keyframes, not SMIL.
 import { RAMP, quant, hash, push, tiers } from "../lib/glyphs.mjs"
@@ -15,23 +14,25 @@ const BUCKETS = 20
 
 export function heroCard({ contrib, repoCount, character }) {
   const { weekTotals, total, commits, prs } = contrib
-  const WMAX = Math.max(...weekTotals)
+  const WMAX = Math.max(...weekTotals) // -Infinity for an empty calendar
+  const hasActivity = Number.isFinite(WMAX) && WMAX > 0
   const char = character.cells
   const charB64 = character.b64
 
   const nCols = Math.max(...NAME.map(l => l.length)) * (GW + GGAP)
   const nRows = NAME.length * GH + (NAME.length - 1) * LGAP
 
-  const weekAt = c => Math.min(52, Math.floor((c / nCols) * 53))
-  // Guard against an all-zero contribution history (WMAX === 0): the
+  // A new account or a fork can have fewer than 53 weeks of calendar.
+  const weekAt = c => Math.min(weekTotals.length - 1, Math.floor((c / nCols) * weekTotals.length))
+  // Guard against an empty or all-zero contribution history: the
   // prototype's log1p(0)/log1p(0) division produces NaN, which short-circuits
   // the quality filter below and lets every covered cell through regardless
   // of activity. Treating a flat-zero history as zero activity keeps quiet
   // weeks producing fewer glyph cells than busy ones, as intended.
-  const activity = c => (WMAX === 0 ? 0 : Math.log1p(weekTotals[weekAt(c)]) / Math.log1p(WMAX))
+  const activity = c => (!hasActivity ? 0 : Math.log1p(weekTotals[weekAt(c)]) / Math.log1p(WMAX))
   const deltaAt = c => {
     const w = weekAt(c)
-    if (w === 0 || WMAX === 0) return 0
+    if (w <= 0 || !hasActivity) return 0
     return Math.abs(weekTotals[w] - weekTotals[w - 1]) / WMAX
   }
 
@@ -53,7 +54,11 @@ export function heroCard({ contrib, repoCount, character }) {
           const quality = cov * (0.45 + 0.55 * activity(col))
           if (quality < 0.13) continue
           const x = Math.round(NX + col * NCW), y = Math.round(NY + row * NCH)
-          const g = RAMP[Math.max(1, Math.min(10, Math.round(cov * 10)))]
+          // The prototype quantised cov to tenths over "  " + RAMP, so tenths
+          // 0-1 were blank; a blank cell draws nothing, so skip it.
+          const gi = Math.round(cov * 10) - 2
+          if (gi < 0) continue
+          const g = RAMP[Math.min(gi, RAMP.length - 1)]
           const q = quant(0.40 + 0.60 * quality)
           if (quality > 0.44) push(nameCore, q, `<text x="${x}" y="${y}">${g}</text>`)
           else push(nameBuckets[Math.floor(hash(col, row) * BUCKETS) % BUCKETS], q, `<text x="${x}" y="${y}">${g}</text>`)
@@ -67,6 +72,7 @@ export function heroCard({ contrib, repoCount, character }) {
 
   // ---- character dissolve cells (pre-baked) ----------------------------------
   for (const [x, y, g, o] of char.cells) {
+    if (g === " ") continue // the bake's ramp has blank entries; they draw nothing
     push(charBuckets[Math.floor(hash(x, y) * BUCKETS) % BUCKETS], quant(o), `<text x="${x}" y="${y}">${g}</text>`)
   }
 
