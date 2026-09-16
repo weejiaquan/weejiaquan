@@ -1,6 +1,6 @@
 // Hero card — animated glyph-field name render with a character dissolve.
-// Ported from the design prototype. Layout constants and animation timings are preserved exactly; they took
-// many iterations to settle. See the Global Constraints in the task brief
+// Ported from the design prototype. Layout constants and animation timings
+// are preserved exactly; they took many iterations to settle. See the Global Constraints in the task brief
 // for why this card has zero SVG filters and uses CSS keyframes, not SMIL.
 import { RAMP, quant, hash, push, tiers } from "../lib/glyphs.mjs"
 import { strokeCov } from "../lib/strokefont.mjs"
@@ -56,9 +56,9 @@ export function heroCard({ contrib, repoCount, character }) {
           const x = Math.round(NX + col * NCW), y = Math.round(NY + row * NCH)
           // The prototype quantised cov to tenths over "  " + RAMP, so tenths
           // 0-1 were blank; a blank cell draws nothing, so skip it.
-          const gi = Math.round(cov * 10) - 2
-          if (gi < 0) continue
-          const g = RAMP[Math.min(gi, RAMP.length - 1)]
+          const ri = Math.round(cov * 10) - 2
+          if (ri < 0) continue
+          const g = RAMP[Math.min(ri, RAMP.length - 1)]
           const q = quant(0.40 + 0.60 * quality)
           if (quality > 0.44) push(nameCore, q, `<text x="${x}" y="${y}">${g}</text>`)
           else push(nameBuckets[Math.floor(hash(col, row) * BUCKETS) % BUCKETS], q, `<text x="${x}" y="${y}">${g}</text>`)
