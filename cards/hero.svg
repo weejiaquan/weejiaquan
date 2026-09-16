@@ -64,8 +64,8 @@
 <path d="M48 62h592" stroke="#2A323C"/>
 <path d="M48 392h500" stroke="#2A323C"/>
 <g font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" fill="#EAF6FF">
-  <text x="48" y="418" font-size="20" font-weight="500" letter-spacing="-.4">4,705<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">CONTRIB</tspan></text>
-  <text x="206" y="418" font-size="20" font-weight="500">616<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">COMMITS</tspan></text>
+  <text x="48" y="418" font-size="20" font-weight="500" letter-spacing="-.4">4,706<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">CONTRIB</tspan></text>
+  <text x="206" y="418" font-size="20" font-weight="500">617<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">COMMITS</tspan></text>
   <text x="356" y="418" font-size="20" font-weight="500">83<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">PR</tspan></text>
   <text x="464" y="418" font-size="20" font-weight="500">26<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">REPOS</tspan></text>
   <text x="900" y="424" text-anchor="end" font-size="9" fill="#5F6E7E" letter-spacing="1.8">ART @Azzinhee</text>
