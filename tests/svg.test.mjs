@@ -79,3 +79,20 @@ test("violations does not flag a static filtered element with no animation", () 
 test("card with a plain rect body still passes with zero violations", () => {
   assert.deepEqual(violations(card({ w: 900, h: 190, body: "<rect/>" })), [])
 })
+
+test("violations flags a filtered animated element even with single-quoted attributes", () => {
+  // same CPU-pinning shape as the earlier SMIL test, just with XML's other
+  // legal quote style, which the double-quote-only regexes used to miss.
+  const bad = card({ w: 10, h: 10, body: "<rect filter='url(#bloom)'><animate attributeName='y' values='1;2' dur='1s' repeatCount='indefinite'/></rect>" })
+  assert.ok(violations(bad).some(v => v.includes("filter")))
+})
+
+test("violations flags a single-quoted on* event handler attribute", () => {
+  const bad = card({ w: 10, h: 10, body: "<rect onload='alert(1)'/>" })
+  assert.ok(violations(bad).some(v => v.includes("event handler")))
+})
+
+test("violations flags class/filter with whitespace around the equals sign", () => {
+  const bad = card({ w: 10, h: 10, body: '<rect class ="n0" filter= "url(#b)"/>' })
+  assert.ok(violations(bad).some(v => v.includes("filter")))
+})

@@ -52,14 +52,16 @@ export function violations(svg) {
   if (!/<svg[^>]*\swidth="/.test(svg)) out.push("missing explicit width attribute")
   if (!/<svg[^>]*\sheight="/.test(svg)) out.push("missing explicit height attribute")
   if (!svg.includes("prefers-reduced-motion")) out.push("missing prefers-reduced-motion opt-out")
-  const onAttr = svg.match(/\son\w+="[^"]*"/i)
+  // XML allows single or double quotes and optional whitespace around "=",
+  // so every attribute-matching regex below accepts both.
+  const onAttr = svg.match(/\son\w+\s*=\s*("[^"]*"|'[^']*')/i)
   if (onAttr) out.push(`contains an event handler attribute: ${onAttr[0].trim()}`)
   for (const m of svg.matchAll(/<(\w+)([^>]*)>/g)) {
     const tagName = m[1]
     const attrs = m[2]
     const selfClosing = /\/\s*$/.test(attrs)
-    const hasClass = /\bclass="/.test(attrs)
-    const hasFilter = /\bfilter="/.test(attrs)
+    const hasClass = /\bclass\s*=\s*["']/.test(attrs)
+    const hasFilter = /\bfilter\s*=\s*["']/.test(attrs)
     if (hasClass && hasFilter) {
       out.push(`filter applied to an element with a class: ${m[0]}`)
     }
