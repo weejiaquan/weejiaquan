@@ -186,3 +186,7 @@ test("every hero animation steps at the shared frame rate, on a shared clock", a
     }
   }
 })
+
+test("hero has no scan line", () => {
+  assert.ok(!/class="scan"|@keyframes kscan/.test(svg), "scan bar should be removed")
+})

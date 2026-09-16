@@ -151,18 +151,6 @@ export function heroCard({ contrib, repoCount, character }) {
     return out
   }
 
-  // scan bar: sweeps the name once per loop, then fades
-  const scanTravel = +(nRows * NCH + 24).toFixed(1)
-  const sT = frames(13), s26 = frames(13 * 0.26), s30 = frames(13 * 0.30), s33 = frames(13 * 0.33)
-  const fadeAt30 = (0.9 * (s33 - s30) / (s33 - s26)).toFixed(2)
-  css.push(stepped("kscan", sT, [
-    [0, "transform:translate(0,0);opacity:.9"],
-    [s26, `transform:translate(0,${+(scanTravel * s26 / s30).toFixed(1)}px);opacity:.9`],
-    [s30, `transform:translate(0,${scanTravel}px);opacity:${fadeAt30}`],
-    [s33, `transform:translate(0,${scanTravel}px);opacity:0`],
-    [sT, `transform:translate(0,${scanTravel}px);opacity:0`],
-  ]) + ".scan{animation:kscan 13s linear 0.0s infinite}")
-
   const R = DX + DW
   const fadeInEnd = ((B1 - B0) / (R - B0)).toFixed(3)
   // the right edge either bleeds off the card (edgeFade 0) or fades out over edgeFade px
@@ -216,8 +204,6 @@ export function heroCard({ contrib, repoCount, character }) {
   ${nameField}
   <g class="ghost" fill="#E1A7F3">${ghosts}</g>
 </g>
-
-<rect class="scan" x="38" y="${NY - 18}" width="${+(nCols * NCW + 24).toFixed(1)}" height="2" fill="#A9F9FF"/>
 
 <!-- footer: all readable text lives below the art zone -->
 <path d="M48 ${ART + 8}h804" stroke="#2A323C"/>
