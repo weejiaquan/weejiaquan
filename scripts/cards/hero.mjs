@@ -145,11 +145,11 @@ export function heroCard({ contrib, repoCount, character }) {
 </g></g>
 
 <!-- the image handing off to type as it fades -->
-<g font-family="'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace" font-size="6.6" font-weight="700"
+<g font-family="'PlexMonoSub','IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace" font-size="6.6" font-weight="700"
    fill="url(#warm)" text-anchor="middle">${scatterGroups(charBuckets, 16, 26, "c")}</g>
 
 <!-- name -->
-<g font-family="'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace" font-size="11.5" font-weight="700"
+<g font-family="'PlexMonoSub','IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace" font-size="11.5" font-weight="700"
    fill="url(#irid)" text-anchor="middle">
   <g>
     <g opacity=".20" font-size="15.5">${tiers(nameCore)}</g>
@@ -166,10 +166,10 @@ export function heroCard({ contrib, repoCount, character }) {
   <animate attributeName="opacity" values=".9;.9;0;0" keyTimes="0;0.26;0.33;1" dur="13s" repeatCount="indefinite"/>
 </rect>
 
-<text x="48" y="50" font-family="Geist,Inter,system-ui,sans-serif" font-size="10.5" fill="#71808F" letter-spacing="4.6">READ ERROR ／ 読取</text>
+<text x="48" y="50" font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" font-size="10.5" fill="#71808F" letter-spacing="4.6">READ ERROR ／ 読取</text>
 <path d="M48 62h${Math.round(nCols * NCW)}" stroke="#2A323C"/>
 <path d="M48 392h500" stroke="#2A323C"/>
-<g font-family="Geist,Inter,system-ui,sans-serif" fill="#EAF6FF">
+<g font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" fill="#EAF6FF">
   <text x="48" y="418" font-size="20" font-weight="500" letter-spacing="-.4">${total.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">CONTRIB</tspan></text>
   <text x="206" y="418" font-size="20" font-weight="500">${commits.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">COMMITS</tspan></text>
   <text x="356" y="418" font-size="20" font-weight="500">${prs.toLocaleString("en-US")}<tspan font-size="9" fill="#71808F" letter-spacing="2.4" dx="8">PR</tspan></text>

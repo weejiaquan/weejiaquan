@@ -1,3 +1,11 @@
+import { readFileSync } from "node:fs"
+
+const readB64 = f => readFileSync(new URL(`../../assets/fonts/${f}`, import.meta.url), "utf8").trim()
+
+export const FONT_FACE_CSS =
+  `@font-face{font-family:'PlexMonoSub';font-weight:700;src:url(data:font/woff2;base64,${readB64("plex-mono-subset.txt")}) format('woff2')}`
+  + `@font-face{font-family:'GeistSub';font-weight:500;src:url(data:font/woff2;base64,${readB64("geist-subset.txt")}) format('woff2')}`
+
 export const PALETTE = {
   bg: "#0A0C10",
   ink: "#EAF6FF",
@@ -13,7 +21,7 @@ const REDUCED_MOTION = "@media(prefers-reduced-motion:reduce){*{animation:none!i
 
 export function card({ w, h, css = "", defs = "", body = "" }) {
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" font-kerning="none">`
-    + `<style>${css}${REDUCED_MOTION}</style>`
+    + `<style>${FONT_FACE_CSS}${css}${REDUCED_MOTION}</style>`
     + (defs ? `<defs>${defs}</defs>` : "")
     + body
     + `</svg>`

@@ -17,13 +17,13 @@ export function languagesCard({ languages }) {
   })
 
   const legend = rows.map((l, i) =>
-    `<text x="28" y="${108 + i * 17}" font-family="Geist,Inter,system-ui,sans-serif" font-size="11" fill="${PALETTE.ink}">`
+    `<text x="28" y="${108 + i * 17}" font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" font-size="11" fill="${PALETTE.ink}">`
     + `<tspan fill="${BAR[i % BAR.length]}">■</tspan> ${l.name}`
     + `<tspan fill="${PALETTE.dim}" dx="6">${l.count}</tspan></text>`).join("")
 
   const body =
     `<rect width="${W}" height="${H}" fill="${PALETTE.bg}"/>`
-    + `<text x="28" y="36" font-family="Geist,Inter,system-ui,sans-serif" font-size="10" fill="${PALETTE.dim}" letter-spacing="4.2">LANGUAGES ／ 言語</text>`
+    + `<text x="28" y="36" font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" font-size="10" fill="${PALETTE.dim}" letter-spacing="4.2">LANGUAGES ／ 言語</text>`
     + `<path d="M28 48h384" stroke="${PALETTE.rule}"/>${bar}${legend}`
   return card({ w: W, h: H, body })
 }

@@ -17,16 +17,16 @@ export function rhythmCard({ matrix }) {
     })
   })
   const dayLabels = DAYS.map((d, i) =>
-    `<text x="26" y="${Math.round(Y0 + i * CH)}" font-family="'IBM Plex Mono',ui-monospace,monospace" `
+    `<text x="26" y="${Math.round(Y0 + i * CH)}" font-family="'PlexMonoSub','IBM Plex Mono',ui-monospace,monospace" `
     + `font-size="8" fill="${PALETTE.dim}" text-anchor="middle">${d}</text>`).join("")
 
   const body =
     `<rect width="${W}" height="${H}" fill="${PALETTE.bg}"/>`
-    + `<text x="28" y="36" font-family="Geist,Inter,system-ui,sans-serif" font-size="10" fill="${PALETTE.dim}" letter-spacing="4.2">RHYTHM ／ 時刻</text>`
+    + `<text x="28" y="36" font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" font-size="10" fill="${PALETTE.dim}" letter-spacing="4.2">RHYTHM ／ 時刻</text>`
     + `<path d="M28 48h384" stroke="${PALETTE.rule}"/>`
-    + `<g font-family="'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="700" `
+    + `<g font-family="'PlexMonoSub','IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="700" `
     + `fill="${PALETTE.blue}" text-anchor="middle">${tiers(buckets)}</g>${dayLabels}`
-    + `<text x="28" y="188" font-family="Geist,Inter,system-ui,sans-serif" font-size="8" fill="${PALETTE.dim}" `
+    + `<text x="28" y="188" font-family="'GeistSub',Geist,Inter,system-ui,sans-serif" font-size="8" fill="${PALETTE.dim}" `
     + `letter-spacing="2">PUBLIC COMMIT SAMPLE ／ VANCOUVER TIME</text>`
   return card({ w: W, h: H, body })
 }
