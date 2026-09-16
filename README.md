@@ -7,8 +7,8 @@ and things that probably shouldn't work but do.
 
 ![Contributions](/cards/contributions.svg)
 
-<picture><img src="/cards/languages.svg" width="418" alt="Languages"></picture>
-<picture><img src="/cards/rhythm.svg" width="418" alt="Rhythm"></picture>
+<picture><img src="/cards/languages.svg" width="49%" alt="Languages"></picture>
+<picture><img src="/cards/rhythm.svg" width="49%" alt="Rhythm"></picture>
 
 ### Projects
 
